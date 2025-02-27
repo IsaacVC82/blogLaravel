@@ -12,21 +12,28 @@ class PostResource extends Resource
 {
     protected static ?string $model = Post::class;
 
-
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('name')
+                    ->label('Nombre del autor')
                     ->required()
                     ->maxLength(255),
+
                 Forms\Components\TextInput::make('slug')
+                    ->label('Slug (único)')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true), // Corregido para ignorar el slug actual al editar
+
                 Forms\Components\TextInput::make('title')
+                    ->label('Título')
                     ->required()
                     ->maxLength(255),
+
                 Forms\Components\Textarea::make('content')
+                    ->label('Contenido')
                     ->required(),
             ]);
     }
@@ -35,10 +42,15 @@ class PostResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name'),
-                Tables\Columns\TextColumn::make('slug'),
-                Tables\Columns\TextColumn::make('title'),
-                Tables\Columns\TextColumn::make('content')->limit(50),
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Nombre'),
+                Tables\Columns\TextColumn::make('slug')
+                    ->label('Slug'),
+                Tables\Columns\TextColumn::make('title')
+                    ->label('Título'),
+                Tables\Columns\TextColumn::make('content')
+                    ->label('Contenido')
+                    ->limit(50),
             ])
             ->filters([])
             ->actions([
