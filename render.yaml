@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: blogLaravel
+    env: docker
+    buildCommand: docker build -t blog-laravel .
+    startCommand: docker run -p $PORT:80 blog-laravel
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_KEY
+        generateValue: true
