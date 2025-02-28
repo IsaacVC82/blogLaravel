@@ -20,7 +20,6 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Instalar las extensiones de PHP necesarias para Laravel
-RUN docker-php-ext-configure zip --with-libzip
 RUN docker-php-ext-install intl zip pdo pdo_mysql opcache
 
 # Instalar Composer
@@ -43,4 +42,3 @@ EXPOSE 80
 
 # Comando para iniciar PHP-FPM
 CMD ["php-fpm"]
-
