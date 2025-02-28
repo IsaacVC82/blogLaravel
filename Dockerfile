@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     curl \
     sudo \
+    nginx \
     && rm -rf /var/lib/apt/lists/*
 
 # Instalar las extensiones de PHP necesarias para Laravel
@@ -37,8 +38,12 @@ RUN composer install --no-dev --optimize-autoloader
 # Configurar permisos adicionales si es necesario (por ejemplo, para la carpeta storage)
 RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
+# Configurar Nginx
+COPY ./nginx/default.conf /etc/nginx/sites-available/default
+
 # Exponer el puerto 80 para servir la aplicación
 EXPOSE 80
 
-# Comando para iniciar PHP-FPM
-CMD ["php-fpm"]
+# Iniciar tanto PHP-FPM como Nginx
+CMD service nginx start && php-fpm
+
