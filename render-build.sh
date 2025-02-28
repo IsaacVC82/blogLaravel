@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 
-# Instalar Composer
-curl -sS https://getcomposer.org/installer | php
-mv composer.phar /usr/local/bin/composer
+# Instalamos PHP
+curl -sSL https://getcomposer.org/installer | php
+sudo mv composer.phar /usr/local/bin/composer
 
-# Instalar dependencias de Laravel
+# Instalamos dependencias de Laravel
 composer install --no-dev --optimize-autoloader
 
-# Generar clave de la app
+# Generamos APP_KEY
 php artisan key:generate
 
-# Ejecutar migraciones (si es necesario)
+# Cachear configuración y rutas
+php artisan config:cache
+php artisan route:cache
+
+# Migrar la base de datos (si es necesario)
 php artisan migrate --force
