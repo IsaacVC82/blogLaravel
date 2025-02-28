@@ -1,5 +1,5 @@
-# Usamos una imagen base con PHP
-FROM php:8.1-fpm
+# Usamos una imagen base con PHP 8.2
+FROM php:8.2-fpm
 
 # Instalar dependencias necesarias para Laravel
 RUN apt-get update && apt-get install -y libpng-dev libjpeg-dev libfreetype6-dev zip git bash libicu-dev libzip-dev
