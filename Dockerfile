@@ -38,12 +38,8 @@ RUN composer install --no-dev --optimize-autoloader
 # Configurar permisos adicionales si es necesario (por ejemplo, para la carpeta storage)
 RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-# Configurar Nginx
-COPY ./nginx/default.conf /etc/nginx/sites-available/default
-
 # Exponer el puerto 80 para servir la aplicación
 EXPOSE 80
 
 # Iniciar tanto PHP-FPM como Nginx
 CMD service nginx start && php-fpm
-
