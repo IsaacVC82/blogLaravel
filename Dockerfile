@@ -34,7 +34,7 @@ RUN chown -R www-data:www-data /var/www
 # Instalar las dependencias de Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# Configurar permisos adicionales si es necesario (por ejemplo, para la carpeta storage)
+# Configurar permisos adicionales si es necesario 
 RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
 # Configurar Nginx
@@ -45,9 +45,5 @@ RUN rm -f /etc/nginx/sites-enabled/default && \
 # Exponer el puerto 80 para servir la aplicación
 EXPOSE 80
 
-# Copiar el script de inicio
-COPY start.sh /usr/local/bin/start.sh
-RUN chmod +x /usr/local/bin/start.sh
-
-# Usar el script de inicio en el CMD
-CMD ["/usr/local/bin/start.sh"]
+# Iniciar tanto Nginx como PHP-FPM
+CMD service nginx start && php-fpm

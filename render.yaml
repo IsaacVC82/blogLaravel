@@ -1,9 +1,7 @@
 services:
   - type: web
     name: blogLaravel
-    env: docker
-    buildCommand: docker build -t blog-laravel .
-    startCommand: docker run -p $PORT:80 blog-laravel
+    runtime: docker
     envVars:
       - key: APP_ENV
         value: production
@@ -11,4 +9,15 @@ services:
         value: false
       - key: APP_KEY
         generateValue: true
-
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        value: your_database_host
+      - key: DB_PORT
+        value: 3306
+      - key: DB_DATABASE
+        value: your_database_name
+      - key: DB_USERNAME
+        value: your_database_user
+      - key: DB_PASSWORD
+        value: your_database_password
