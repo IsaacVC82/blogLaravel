@@ -35,8 +35,12 @@ RUN chown -R www-data:www-data /var/www
 # Instalar las dependencias de Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# Configurar permisos adicionales si es necesario (por ejemplo, para la carpeta storage)
+# Configurar permisos adicionales si es necesario 
 RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
+# Configurar Nginx
+COPY ./nginx/default.conf /etc/nginx/sites-available/default
+RUN ln -s /etc/nginx/sites-available/default /etc/nginx/sites-enabled/
 
 # Exponer el puerto 80 para servir la aplicación
 EXPOSE 80
