@@ -11,7 +11,6 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     zip \
     git \
-    bash \
     libicu-dev \
     libzip-dev \
     libxml2-dev \
@@ -46,10 +45,5 @@ RUN rm -f /etc/nginx/sites-enabled/default && \
 # Exponer el puerto 80 para servir la aplicación
 EXPOSE 80
 
-
-# Copiar el script de inicio
-COPY start.sh /usr/local/bin/start.sh
-RUN chmod +x /usr/local/bin/start.sh
-
-# Usar el script de inicio en el CMD
-CMD ["/usr/local/bin/start.sh"]
+# Iniciar tanto Nginx como PHP-FPM
+CMD service nginx start && php-fpm
