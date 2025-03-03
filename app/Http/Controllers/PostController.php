@@ -2,36 +2,80 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post;
 use Illuminate\Http\Request;
+use App\Models\Post;
 
 class PostController extends Controller
 {
+    // Obtener todos los posts
     public function index()
     {
-        return response()->json(Post::all());
+        $posts = Post::all();
+        return response()->json($posts);
     }
 
+    // Crear un nuevo post
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'slug' => 'required|string|max:255|unique:posts',
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+        ]);
+
+        $imagePath = $request->hasFile('image') 
+            ? $request->file('image')->store('images', 'public')
+            : null;
+
+        $post = Post::create([
+            'name' => $request->name,
+            'slug' => $request->slug,
+            'title' => $request->title,
+            'content' => $request->content,
+            'image' => $imagePath,
+        ]);
+
+        return response()->json(['message' => 'Post creado correctamente', 'post' => $post]);
+    }
+
+    // Obtener un post por su slug
     public function show($slug)
     {
-        $post = Post::where('slug', $slug)->first();
-        if (!$post) {
-            return response()->json(['error' => 'Post not found'], 404);
-        }
+        $post = Post::where('slug', $slug)->firstOrFail();
         return response()->json($post);
     }
 
-    public function store(Request $request)
+    // Actualizar un post
+    public function update(Request $request, $slug)
     {
-        $validated = $request->validate([
-            'name' => 'required|max:255',
-            'slug' => 'required|max:255|unique:posts,slug',
-            'title' => 'required|max:255',
-            'content' => 'required',
+        $post = Post::where('slug', $slug)->firstOrFail();
+
+        $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'slug' => 'sometimes|string|max:255|unique:posts,slug,' . $post->id,
+            'title' => 'sometimes|string|max:255',
+            'content' => 'sometimes|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
         ]);
 
-        $post = Post::create($validated);
+        if ($request->hasFile('image')) {
+            $post->image = $request->file('image')->store('images', 'public');
+        }
 
-        return response()->json($post, 201);
+        $post->update($request->only('name', 'slug', 'title', 'content', 'image'));
+
+        return response()->json(['message' => 'Post actualizado correctamente', 'post' => $post]);
+    }
+
+    // Eliminar un post
+    public function destroy($slug)
+    {
+        $post = Post::where('slug', $slug)->firstOrFail();
+        $post->delete();
+
+        return response()->json(['message' => 'Post eliminado correctamente']);
     }
 }
+

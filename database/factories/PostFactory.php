@@ -19,6 +19,7 @@ class PostFactory extends Factory
             'slug' => Str::slug($title) . '-' . Str::random(5), // slug único
             'title' => $title,
             'content' => $this->faker->paragraph(4), // Párrafo con 4 oraciones
+            'image' => 'images/' . $this->faker->image('storage/app/public/images', 640, 480, null, false), // Genera una imagen falsa
         ];
     }
 }

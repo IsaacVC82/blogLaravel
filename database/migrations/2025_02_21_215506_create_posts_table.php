@@ -13,6 +13,9 @@ return new class extends Migration {
             $table->string('title');
             $table->text('content');
             $table->timestamps();
+            $table->string('image')->nullable(); // Ruta de la imagen
+        
+
         });
     }
 
