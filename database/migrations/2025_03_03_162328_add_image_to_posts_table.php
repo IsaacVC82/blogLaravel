@@ -9,12 +9,15 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('posts', function (Blueprint $table) {
-            $table->string('image')->nullable();  // Agrega la columna 'image'
+            if (!Schema::hasColumn('posts', 'image')) {
+                $table->string('image')->nullable();
+            }
         });
     }
+    
     
     public function down()
     {

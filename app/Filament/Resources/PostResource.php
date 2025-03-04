@@ -7,6 +7,8 @@ use App\Models\Post;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Forms\Components\FileUpload;
+use Filament\Tables\Columns\ImageColumn;
 
 class PostResource extends Resource
 {
@@ -25,7 +27,7 @@ class PostResource extends Resource
                     ->label('Slug (único)')
                     ->required()
                     ->maxLength(255)
-                    ->unique(ignoreRecord: true), // Corregido para ignorar el slug actual al editar
+                    ->unique(ignoreRecord: true),
 
                 Forms\Components\TextInput::make('title')
                     ->label('Título')
@@ -35,6 +37,14 @@ class PostResource extends Resource
                 Forms\Components\Textarea::make('content')
                     ->label('Contenido')
                     ->required(),
+
+                // Campo para la imagen
+                FileUpload::make('image')
+                    ->label('Imagen')
+                    ->image() // Esto asegura que el campo se maneje como una imagen
+                    ->disk('public') // Asegura que se guarde en el disco 'public'
+                    ->directory('images') // La carpeta donde se almacenarán las imágenes
+                    ->required()
             ]);
     }
 
@@ -51,6 +61,12 @@ class PostResource extends Resource
                 Tables\Columns\TextColumn::make('content')
                     ->label('Contenido')
                     ->limit(50),
+
+                // Columna para mostrar la imagen
+                ImageColumn::make('image')
+                    ->label('Imagen')
+                    ->disk('public')  // Especifica el disco de almacenamiento, aquí se usa 'public' que corresponde a 'storage/app/public'
+                    ->size(70) // Ajusta el tamaño de la imagen si es necesario
             ])
             ->filters([])
             ->actions([
@@ -75,3 +91,4 @@ class PostResource extends Resource
         ];
     }
 }
+

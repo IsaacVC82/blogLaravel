@@ -28,6 +28,10 @@ class Post extends Model
      *
      * @var array<string, string>
      */
+    public function getImageAttribute($value)
+{
+    return asset('storage/' . $value);
+}
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
