@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -10,30 +9,41 @@ class Post extends Model
 {
     use HasFactory;
 
-    /**
-     * Los atributos que son asignables en masa.
-     *
-     * @var array<string>
-     */
     protected $fillable = [
-        'name',   
-        'slug',    
-        'title',   
-        'content', 
+        'name',
+        'slug',
+        'title',
+        'content',
         'image',
     ];
 
-    /**
-     * Los atributos que deben ser convertidos a tipos nativos.
-     *
-     * @var array<string, string>
-     */
-    public function getImageAttribute($value)
-{
-    return asset('storage/' . $value);
-}
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    public function toArray()
+    {
+        return [
+            'id' => $this->id,
+            'title' => $this->title,
+            'content' => $this->content,
+            'slug' => $this->slug,
+            'image_url' => asset('storage/' . $this->image),
+        ];
+    }
+
+    // Relación uno a muchos con PostTranslation
+    public function translations()
+    {
+        return $this->hasMany(PostTranslation::class);
+    }
+    
+
+    // Obtener una traducción específica por 'locale'
+    public function translation($locale)
+    {
+        return $this->translations()->where('locale', $locale)->first();
+    }
 }
+

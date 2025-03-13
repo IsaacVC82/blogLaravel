@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Post;
+use Illuminate\Http\Request;
+
+class PostController extends Controller
+{
+    public function index(Request $request)
+    {
+        $lang = $request->query('lang', 'es'); // Idioma por defecto
+
+        // Obtener los posts con las traducciones correspondientes
+        $posts = Post::with(['translations' => function ($query) use ($lang) {
+            $query->where('lang', $lang); // Filtrar por idioma
+        }])->paginate(10);
+
+        // Si no hay posts
+        if ($posts->isEmpty()) {
+            return response()->json(['message' => 'No posts found for this language'], 404);
+        }
+
+        // Formatear los posts para incluir la traducción adecuada
+        $formattedPosts = $posts->getCollection()->map(function ($post) use ($lang) {
+            $translation = $post->translations->first(); // Tomar la traducción correspondiente
+            return [
+                'slug' => $post->slug,
+                'title' => $translation ? $translation->title : $post->title, // Usar traducción si existe
+                'content' => $translation ? $translation->content : $post->content, // Usar traducción si existe
+                'lang' => $translation ? $translation->lang : 'es', // Si no hay traducción, usar el idioma por defecto
+                'image_url' => $post->image ? asset('storage/' . $post->image) : null, // Añadir la URL de la imagen
+            ];
+        });
+
+        // Responder con los posts formateados y la información de paginación
+        return response()->json([
+            'data' => $formattedPosts,
+            'pagination' => [
+                'current_page' => $posts->currentPage(),
+                'last_page' => $posts->lastPage(),
+                'per_page' => $posts->perPage(),
+                'total' => $posts->total(),
+            ],
+        ]);
+    }
+
+    public function show(Request $request, $slug)
+    {
+        $lang = $request->query('lang', 'es'); // Idioma por defecto
+
+        // Obtener el post con sus traducciones
+        $post = Post::with('translations')->where('slug', $slug)->first();
+
+        if (!$post) {
+            return response()->json(['message' => 'Post not found'], 404);
+        }
+
+        // Buscar la traducción correspondiente al idioma
+        $translation = $post->translations->where('lang', $lang)->first();
+
+        // Obtener los posts anteriores y siguientes para paginación
+        $previous = Post::where('id', '<', $post->id)->orderBy('id', 'desc')->first();
+        $next = Post::where('id', '>', $post->id)->orderBy('id', 'asc')->first();
+
+        // Devolver la respuesta con la traducción y la paginación
+        return response()->json([
+            'title' => $translation ? $translation->title : $post->title, // Usar traducción si existe
+            'content' => $translation ? $translation->content : $post->content, // Usar traducción si existe
+            'slug' => $post->slug,
+            'lang' => $translation ? $translation->lang : 'es', // Si no hay traducción, usar el idioma por defecto
+            'image_url' => $post->image ? asset('storage/' . $post->image) : null,
+            'pagination' => [
+                'previous' => $previous ? $previous->slug : null,
+                'next' => $next ? $next->slug : null,
+            ],
+        ]);
+    }
+}
+

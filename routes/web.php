@@ -1,22 +1,20 @@
 <?php
+use App\Http\Controllers\PostController; 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PostController;
 use App\Http\Controllers\BlogController;
 
 // Rutas de Filament
 Route::prefix('admin')->group(function () {
+
 });
 
-// Rutas del blog (para el frontend)
+// Rutas del blog (frontend)
 Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
 Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+Route::get('/{lang}/posts/{slug}', [PostController::class, 'show'])->where(['lang' => 'es|en']);
 
-// Rutas de la API para posts (index y show por slug)
-Route::prefix('api')->group(function () {
-    Route::get('/posts', [PostController::class, 'index']);
-    Route::get('/posts/{slug}', [PostController::class, 'show']);
-});
 
+// Página de inicio
 Route::get('/', function () {
     return view('welcome');
 });
