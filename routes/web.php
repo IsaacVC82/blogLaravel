@@ -2,8 +2,10 @@
 use App\Http\Controllers\PostController; 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BlogController;
+use Intervention\Image\ImageManager;
+use App\Http\Controllers\ImageController; 
+use Illuminate\Support\Facades\Storage; 
 
-// Rutas de Filament (si las necesitas)
 Route::prefix('admin')->group(function () {
 });
 
@@ -20,6 +22,7 @@ Route::get('/{lang}/posts/{slug}', [PostController::class, 'show'])->where(['lan
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/image/{filename}', [ImageController::class, 'processImage']);
 
 
 
