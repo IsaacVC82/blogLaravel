@@ -193,7 +193,6 @@ class PostSeeder extends Seeder
                 PostTranslation::updateOrCreate(
                     [
                         'post_id' => $post->id, 
-                        'lang' => $lang,
                     ],
                     [   'locale' => 'es', 
                         'title' => $translation['title'], 

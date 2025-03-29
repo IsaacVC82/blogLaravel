@@ -1,12 +1,14 @@
 <?php
+use App\Models\Post;
 use App\Http\Controllers\PostController; 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BlogController;
 use Intervention\Image\ImageManager;
-use App\Http\Controllers\ImageController; 
-use Illuminate\Support\Facades\Storage; 
+use Intervention\Image\Drivers\Gd\Driver;
+use Illuminate\Http\Request;
 
 Route::prefix('admin')->group(function () {
+    
 });
 
 // Rutas del blog (frontend)
@@ -22,7 +24,28 @@ Route::get('/{lang}/posts/{slug}', [PostController::class, 'show'])->where(['lan
 Route::get('/', function () {
     return view('welcome');
 });
-Route::get('/image/{filename}', [ImageController::class, 'processImage']);
+
+// Ruta para procesar y servir imágenes sin guardarlas en disco
+Route::get('/images/{post}/{type}', function (Post $post, $type) {
+    if (!$post->image) {
+        abort(404);
+    }
+    
+    $manager = new ImageManager(new Driver());
+    $image = $manager->read(file_get_contents(storage_path('app/public/' . $post->image)));
+    
+    if ($type === 'thumbnail') {
+        $image->resize(480, 480, function ($constraint) {
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        });
+    }
+    
+    return $image->toWebp(90)
+        ->toResponse()
+        ->header('Content-Type', 'image/webp');
+})->name('image.display');
+
 
 
 

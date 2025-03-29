@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\Http\Request;
 
 class Post extends Model
@@ -13,6 +13,7 @@ class Post extends Model
     use HasFactory;
 
     protected $fillable = [
+        'name', 
         'title',
         'slug',
         'content',
@@ -41,87 +42,20 @@ class Post extends Model
     }
 
     /**
-     * Convertir el modelo a array
+     * Procesar la imagen con Intervention Image sin guardarla en disco
      */
-    public function toArray()
+    public static function processImage($file, $type = 'original')
     {
-        return [
-            'id' => $this->id,
-            'title' => $this->title,
-            'content' => $this->content,
-            'slug' => $this->slug,
-            'image' => $this->image,
-            'image_url' => $this->getImageUrlAttribute(),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
-            'translations' => $this->translations,
-        ];
-    }
+        $manager = new ImageManager(new Driver());
+        $image = $manager->read($file);
 
-    /**
-     * Accesor para la URL completa de la imagen
-     */
-    public function getImageUrlAttribute()
-    {
-        return $this->image ? asset('storage/' . $this->image) : null;
-    }
-
-    /**
-     * Subir y convertir imagen a WebP
-     *
-     * @param Request $request
-     * @param string $fieldName
-     * @param string $directory
-     * @return string|null
-     */
-
-     public static function uploadImage(Request $request, $fieldName = 'image', $directory = 'posts')
-     {
-         if (!$request->hasFile($fieldName)) {
-             return null;
-         }
-     
-         // Validar que sea una imagen (PNG/JPG)
-         $request->validate([
-             $fieldName => 'required|image|mimes:png,jpg,jpeg|max:2048',
-         ]);
-     
-         // Forzar nombre con extensión .webp
-         $imageName = time() . '_' . uniqid() . '.webp'; 
-         $storagePath = 'public/' . $directory . '/' . $imageName;
-     
-         //  Convertir a WebP con Intervention Image
-         $image = Image::make($request->file($fieldName))
-             ->encode('webp', 90); // Calidad 90%
-     
-         Storage::put($storagePath, (string) $image);
-     
-         return $directory . '/' . $imageName; 
-     }
-
-    /**
-     * Eliminar la imagen asociada al post
-     */
-    public function deleteImage()
-    {
-        if ($this->image && Storage::exists('public/' . $this->image)) {
-            Storage::delete('public/' . $this->image);
+        if ($type === 'thumbnail') {
+            $image->resize(480, 480, function ($constraint) {
+                $constraint->aspectRatio();
+                $constraint->upsize();
+            });
         }
-    }
 
-    /**
-     * Eliminar el post junto con su imagen y traducciones
-     */
-    public static function boot()
-    {
-        parent::boot();
-
-        static::deleting(function ($post) {
-            // Eliminar imagen
-            $post->deleteImage();
-            
-            // Eliminar traducciones
-            $post->translations()->delete();
-        });
+        return $image->toWebp(90)->toResponse()->header('Content-Type', 'image/webp');
     }
 }
